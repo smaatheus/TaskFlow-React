@@ -2,6 +2,11 @@
 
 Lista de tarefas desenvolvida com React para praticar conceitos fundamentais de front-end, como componentização, gerenciamento de estado, manipulação de eventos e persistência de dados no navegador.
 
+## Demo
+
+- Deploy: https://todo-react-kohl-beta.vercel.app/
+- Repositório: https://github.com/smaatheus/TaskFlow-React.git
+
 ## Sobre o projeto
 
 O TaskFlow é um To do list com interface moderna e responsiva, criado para organizar tarefas de forma simples e eficiente.
