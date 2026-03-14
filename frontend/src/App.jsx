@@ -17,7 +17,7 @@ function App() {
         const formattedTasks = data.map((task) => ({
           id: task.id,
           text: task.title,
-          priority: task.priority || "normal",
+          priority: task.priority ?? "Média",
           completed: task.completed,
           createdAt: new Date(task.created_at).toLocaleDateString("pt-BR"),
         }));

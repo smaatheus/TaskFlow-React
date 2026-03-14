@@ -53,11 +53,11 @@ app.get("/tasks", async (req, res) => {
 
 app.post("/tasks", async (req, res) => {
   try {
-    const { title, description } = req.body;
+    const { title, description, priority } = req.body;
 
     const result = await pool.query(
-      "INSERT INTO tasks (title, description) VALUES ($1, $2) RETURNING *",
-      [title, description || null]
+      "INSERT INTO tasks (title, description, priority) VALUES ($1, $2, $3) RETURNING *",
+      [title, description || null, priority || "Média"],
     );
 
     res.status(201).json(result.rows[0]);
@@ -75,7 +75,7 @@ app.delete("/tasks/:id", async (req, res) => {
 
     const result = await pool.query(
       "DELETE FROM tasks WHERE id = $1 RETURNING *",
-      [id]
+      [id],
     );
 
     console.log("rowCount:", result.rowCount);
