@@ -66,6 +66,22 @@ app.post("/tasks", async (req, res) => {
   }
 });
 
+app.delete("/tasks/completed", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "DELETE FROM tasks WHERE completed = true RETURNING *",
+    );
+
+    res.json({
+      ok: true,
+      deletedCount: result.rowCount,
+      deletedTasks: result.rows,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.delete("/tasks/:id", async (req, res) => {
   console.log("DELETE bateu na rota");
   console.log("ID recebido:", req.params.id);
@@ -92,6 +108,46 @@ app.delete("/tasks/:id", async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3001;
+
+app.put("/tasks/:id/completed", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { completed } = req.body;
+
+    const result = await pool.query(
+      "UPDATE tasks SET completed = $1 WHERE id = $2 RETURNING *",
+      [completed, id],
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Tarefa não encontrada" });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put("/tasks/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title } = req.body;
+
+    const result = await pool.query(
+      "UPDATE tasks SET title = $1 WHERE id = $2 RETURNING *",
+      [title, id],
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Tarefa não encontrada" });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);

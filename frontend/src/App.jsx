@@ -101,23 +101,78 @@ function App() {
     }
   }
 
-  function toggleTask(taskId) {
-    const updatedTasks = tasks.map((task) =>
-      task.id === taskId ? { ...task, completed: !task.completed } : task,
-    );
+  async function toggleTask(taskId) {
+    const taskToUpdate = tasks.find((task) => task.id === taskId);
 
-    setTasks(updatedTasks);
+    if (!taskToUpdate) return;
+
+    const newCompleted = !taskToUpdate.completed;
+
+    try {
+      const response = await fetch(
+        `http://localhost:3001/tasks/${taskId}/completed`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            completed: newCompleted,
+          }),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Erro ao atualizar tarefa");
+      }
+
+      const updatedTaskFromApi = await response.json();
+
+      const updatedTasks = tasks.map((task) =>
+        task.id === taskId
+          ? { ...task, completed: updatedTaskFromApi.completed }
+          : task,
+      );
+
+      setTasks(updatedTasks);
+    } catch (error) {
+      console.error("Erro ao concluir tarefa:", error);
+      alert("Não foi possível atualizar a tarefa");
+    }
   }
 
-  function editTask(taskId, newText) {
-    const updatedTasks = tasks.map((task) =>
-      task.id === taskId ? { ...task, text: newText } : task,
-    );
+  async function editTask(taskId, newText) {
+    if (newText.trim() === "") return;
 
-    setTasks(updatedTasks);
+    try {
+      const response = await fetch(`http://localhost:3001/tasks/${taskId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: newText,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Erro ao editar tarefa");
+      }
+
+      const updatedTaskFromApi = await response.json();
+
+      const updatedTasks = tasks.map((task) =>
+        task.id === taskId ? { ...task, text: updatedTaskFromApi.title } : task,
+      );
+
+      setTasks(updatedTasks);
+    } catch (error) {
+      console.error("Erro ao editar tarefa:", error);
+      alert("Não foi possível editar a tarefa");
+    }
   }
 
-  function clearCompletedTasks() {
+  async function clearCompletedTasks() {
     const completedTasks = tasks.some((task) => task.completed);
 
     if (!completedTasks) {
@@ -131,8 +186,21 @@ function App() {
 
     if (!confirmClear) return;
 
-    const updatedTasks = tasks.filter((task) => !task.completed);
-    setTasks(updatedTasks);
+    try {
+      const response = await fetch("http://localhost:3001/tasks/completed", {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Erro ao remover tarefas concluídas");
+      }
+
+      const updatedTasks = tasks.filter((task) => !task.completed);
+      setTasks(updatedTasks);
+    } catch (error) {
+      console.error("Erro ao remover tarefas concluídas:", error);
+      alert("Não foi possível remover as tarefas concluídas");
+    }
   }
 
   const filteredTasks = tasks
